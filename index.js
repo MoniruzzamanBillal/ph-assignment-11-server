@@ -89,14 +89,45 @@ async function run() {
     //  ? ==================cart section api =================
 
     // add item in cart
-    app.post("/addCart", async (req, res) => {
+
+    app.patch("/addCart", async (req, res) => {
       console.log("hit in add cart ");
 
-      const data = req.body;
+      const { id, orderQuantity, byuer } = req.body;
 
-      console.log(data);
+      // console.log(id);
 
-      const response = await cartCellection.insertOne(data);
+      const query = { _id: new ObjectId(id) };
+      const expectedData = await menusCollection.findOne(query);
+      const withUID = { ...expectedData, orderQuantity, byuer };
+      const option = { upsert: true };
+
+      const update = {
+        $set: {
+          ...withUID,
+        },
+      };
+
+      const result = await cartCellection.updateOne(query, update, option);
+
+      res.send(result);
+    });
+
+    // for gettingcart data
+    app.get("/cartData", async (req, res) => {
+      // console.log(req.query);
+
+      let query = {};
+
+      if (req?.query?.email) {
+        query = {
+          byuer: req.query.email,
+        };
+      }
+
+      const response = await cartCellection.find(query).toArray();
+
+      console.log(response);
 
       res.send(response);
     });
