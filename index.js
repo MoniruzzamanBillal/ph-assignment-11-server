@@ -40,8 +40,9 @@ async function run() {
     const database = client.db("Resto");
     const menusCollection = database.collection("all-menus");
     const cartCellection = database.collection("cart");
+    const orderCollection = database.collection("order");
 
-    // get all menus
+    // get all menus pagination
     app.get("/menus", async (req, res) => {
       // console.log("hit in menu");
 
@@ -55,6 +56,11 @@ async function run() {
       const data = await response.toArray();
 
       res.send(data);
+    });
+
+    app.get("/searchMenu", async (req, res) => {
+      const response = await menusCollection.find().toArray();
+      res.send(response);
     });
 
     // count total data from all menus
@@ -104,6 +110,36 @@ async function run() {
       const result = await menusCollection.insertOne(body);
       res.send(result);
     });
+
+    // !
+    // !
+    // !
+    // !
+    // !
+    // !
+    // !
+    app.post("/updateAll", async (req, res) => {
+      const updatedData = req.body;
+      const result = await orderCollection.insertMany(updatedData);
+      res.send(result);
+    });
+
+    // get all order items
+    app.get("/order", async (req, res) => {
+      const response = await orderCollection.find().toArray();
+
+      res.send(response);
+    });
+
+    // !
+    // !
+    // !
+    // !
+    // !
+    // !
+    // !
+    // !
+    // !
 
     //  ? ==================cart section api =================
 
