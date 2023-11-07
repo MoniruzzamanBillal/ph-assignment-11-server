@@ -118,15 +118,27 @@ async function run() {
     // !
     // !
     // !
+    // app.post("/updateAll", async (req, res) => {
+    //   const updatedData = req.body;
+    //   const result = await orderCollection.insertMany(updatedData);
+    //   res.send(result);
+    // });
     app.post("/updateAll", async (req, res) => {
       const updatedData = req.body;
-      const result = await orderCollection.insertMany(updatedData);
+
+      const documentsWithUniqueIds = updatedData.map((data) => ({
+        ...data,
+        _id: new ObjectId(),
+      }));
+
+      const result = await orderCollection.insertMany(documentsWithUniqueIds);
       res.send(result);
     });
 
     // get all order items
     app.get("/order", async (req, res) => {
       const response = await orderCollection.find().toArray();
+      const uniqueObjectId = new ObjectId();
 
       res.send(response);
     });
