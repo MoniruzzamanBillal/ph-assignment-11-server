@@ -77,6 +77,25 @@ async function run() {
       res.send(response);
     });
 
+    //  update menu item
+    app.patch("/update/:id", async (req, res) => {
+      const id = req.params.id;
+
+      const updatedData = req.body;
+
+      const query = { _id: new ObjectId(id) };
+      const option = { upsert: true };
+      const update = {
+        $set: {
+          ...updatedData,
+        },
+      };
+      const result = await menusCollection.updateOne(query, update, option);
+      res.send(result);
+
+      //
+    });
+
     // add new item
     app.post("/addNew", async (req, res) => {
       const body = req.body;
@@ -130,6 +149,15 @@ async function run() {
       console.log(response);
 
       res.send(response);
+    });
+
+    // delete from cart
+    app.delete(`/cartData/:id`, async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await cartCellection.deleteOne(query);
+      res.send(result);
     });
 
     //
