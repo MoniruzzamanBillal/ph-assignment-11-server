@@ -52,7 +52,7 @@ async function run() {
       console.log(perpageData);
       console.log(currentActive);
 
-      const skip = currentActive * perpageData;
+      const skip = (currentActive - 1) * perpageData;
 
       const response = menusCollection.find().skip(skip).limit(perpageData);
       const data = await response.toArray();
