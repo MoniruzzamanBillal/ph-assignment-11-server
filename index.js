@@ -123,16 +123,25 @@ async function run() {
     //   const result = await orderCollection.insertMany(updatedData);
     //   res.send(result);
     // });
-    app.post("/updateAll", async (req, res) => {
-      const updatedData = req.body;
+    app.put("/updateAll", async (req, res) => {
+      const updatedDataArray = req.body;
+      const results = [];
+      for (const updatedData of updatedDataArray) {
+        const id = updatedData._id; // Assuming each data item has an _id field
+        delete updatedData._id;
+        const query = { _id: new ObjectId(id) };
+        const option = { upsert: true };
+        const update = {
+          $set: {
+            updatedData,
+          },
+        };
 
-      const documentsWithUniqueIds = updatedData.map((data) => ({
-        ...data,
-        _id: new ObjectId(),
-      }));
+        const result = await orderCollection.updateOne(query, update, option);
+        results.push(result);
+      }
 
-      const result = await orderCollection.insertMany(documentsWithUniqueIds);
-      res.send(result);
+      res.send(results);
     });
 
     // get all order items
@@ -161,8 +170,6 @@ async function run() {
       console.log("hit in add cart ");
 
       const { id, orderQuantity, byuer } = req.body;
-
-      // console.log(id);
 
       const query = { _id: new ObjectId(id) };
       const expectedData = await menusCollection.findOne(query);
@@ -206,6 +213,13 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await cartCellection.deleteOne(query);
       res.send(result);
+    });
+
+    // delete all cart items
+    app.delete("/cartDelete", async (req, res) => {
+      const response = await cartCellection.deleteMany();
+
+      res.send(response);
     });
 
     //
