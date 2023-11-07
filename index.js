@@ -16,7 +16,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://resto-fe8f1.web.app"],
     credentials: true,
   })
 );
@@ -35,12 +35,67 @@ const client = new MongoClient(uri, {
   },
 });
 
+// custom middle wirte
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies.token1;
+
+  if (!token) {
+    return res.statuS(401).send("unauthorized token ");
+  }
+
+  jwt.verify(token, process.env.Access_Token_SECRET, (error, decode) => {
+    if (err) {
+      res.send({ message: "unauthorized " });
+    }
+
+    req.user = decode;
+
+    next();
+  });
+};
+
 async function run() {
   try {
     const database = client.db("Resto");
     const menusCollection = database.collection("all-menus");
     const cartCellection = database.collection("cart");
     const orderCollection = database.collection("order");
+
+    // token
+    // token
+    // token
+    // token
+    // token
+    // making token and send to cookie
+    app.post("/jwt", async (req, res) => {
+      const data = req.body;
+
+      // creating token
+      const token = jwt.sign(data, process.env.Access_Token_SECRET, {
+        expiresIn: "1h",
+      });
+
+      // sending token in cookie
+      res
+        .cookie("token", token, {
+          secure: false,
+          httpOnly: true,
+        })
+        .send({ message: "successfully send to cookie " });
+    });
+
+    // clear cookie
+    app.get("/logout", async (req, res) => {
+      console.log("hit logout ");
+      res.clearCookie("token");
+      res.redirect("/login");
+    });
+
+    // token
+    // token
+    // token
+    // token
+    // token
 
     // get all menus pagination
     app.get("/menus", async (req, res) => {
@@ -118,11 +173,7 @@ async function run() {
     // !
     // !
     // !
-    // app.post("/updateAll", async (req, res) => {
-    //   const updatedData = req.body;
-    //   const result = await orderCollection.insertMany(updatedData);
-    //   res.send(result);
-    // });
+
     app.put("/updateAll", async (req, res) => {
       const updatedDataArray = req.body;
       const results = [];
@@ -167,8 +218,6 @@ async function run() {
     // add item in cart
 
     app.patch("/addCart", async (req, res) => {
-      console.log("hit in add cart ");
-
       const { id, orderQuantity, byuer } = req.body;
 
       const query = { _id: new ObjectId(id) };
