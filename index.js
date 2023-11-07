@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId, upsert } = require("mongodb");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 5000;
@@ -39,6 +39,7 @@ async function run() {
   try {
     const database = client.db("Resto");
     const menusCollection = database.collection("all-menus");
+    const cartCellection = database.collection("cart");
 
     // get all menus
     app.get("/menus", async (req, res) => {
@@ -48,10 +49,6 @@ async function run() {
 
       const perpageData = parseInt(dataPerPage);
       const currentActive = parseInt(currentPage);
-
-      // console.log(perpageData);
-      // console.log(currentActive);
-
       const skip = (currentActive - 1) * perpageData;
 
       const response = menusCollection.find().skip(skip).limit(perpageData);
@@ -69,13 +66,13 @@ async function run() {
     // get specific data based on id
     app.get("/menu/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+      // console.log(id);
 
       const query = { _id: new ObjectId(id) };
 
       const response = await menusCollection.findOne(query);
 
-      console.log(response);
+      // console.log(response);
 
       res.send(response);
     });
@@ -87,6 +84,21 @@ async function run() {
 
       const result = await menusCollection.insertOne(body);
       res.send(result);
+    });
+
+    //  ? ==================cart section api =================
+
+    // add item in cart
+    app.post("/addCart", async (req, res) => {
+      console.log("hit in add cart ");
+
+      const data = req.body;
+
+      console.log(data);
+
+      const response = await cartCellection.insertOne(data);
+
+      res.send(response);
     });
 
     //
