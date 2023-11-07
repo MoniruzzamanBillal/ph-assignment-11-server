@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 5000;
@@ -42,15 +42,15 @@ async function run() {
 
     // get all menus
     app.get("/menus", async (req, res) => {
-      console.log("hit in menu");
+      // console.log("hit in menu");
 
       const { dataPerPage, currentPage } = req.query;
 
       const perpageData = parseInt(dataPerPage);
       const currentActive = parseInt(currentPage);
 
-      console.log(perpageData);
-      console.log(currentActive);
+      // console.log(perpageData);
+      // console.log(currentActive);
 
       const skip = (currentActive - 1) * perpageData;
 
@@ -63,10 +63,21 @@ async function run() {
     // count total data from all menus
     app.get("/productCount", async (req, res) => {
       const count = await menusCollection.estimatedDocumentCount();
-
-      //   console.log(count);
-
       res.send({ count: count });
+    });
+
+    // get specific data based on id
+    app.get("/menu/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+
+      const query = { _id: new ObjectId(id) };
+
+      const response = await menusCollection.findOne(query);
+
+      console.log(response);
+
+      res.send(response);
     });
 
     await client.db("admin").command({ ping: 1 });
